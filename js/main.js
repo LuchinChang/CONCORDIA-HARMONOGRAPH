@@ -1,17 +1,18 @@
 // ============================================================================
-// THE CELESTIAL HARMONOGRAPH - Main Application
+// THE CELESTIAL HARMONOGRAPH - Rhythmically Responsive Version
+// "A breathing solar system that thumps on the kick drum"
 // ============================================================================
 
 // Core components
 let audioAnalyzer;
 let renderer;
-let rendererRight; // For split screen
+let rendererRight;
 
-// Graphics layers
+// Graphics layers (for trails with pulse effect)
 let harmonographLayer;
-let harmonographLayerRight; // For split screen
+let harmonographLayerRight;
 
-// Planets - two sets for split screen
+// Planets
 let planetsLeft = [];
 let planetsRight = [];
 
@@ -34,11 +35,14 @@ let currentFileName = '';
 let startTime;
 const FULL_CYCLE_DURATION = 240000;
 
-// Frame counter for draw interval
+// Frame counter
 let frameCounter = 0;
 
 // Panel visibility
 let panelVisible = false;
+
+// Pulse visualization state
+let currentPulseScale = 1.0;
 
 // ============================================================================
 // p5.js SETUP
@@ -48,13 +52,7 @@ function setup() {
   colorMode(HSB, 360, 100, 100, 100);
 
   // Create graphics layers
-  harmonographLayer = createGraphics(width, height);
-  harmonographLayer.colorMode(HSB, 360, 100, 100, 100);
-  harmonographLayer.background(0);
-
-  harmonographLayerRight = createGraphics(width, height);
-  harmonographLayerRight.colorMode(HSB, 360, 100, 100, 100);
-  harmonographLayerRight.background(0);
+  createGraphicsLayers();
 
   // Create renderers
   renderer = new HarmonographRenderer(harmonographLayer);
@@ -76,24 +74,36 @@ function setup() {
   setupUIListeners();
 }
 
+function createGraphicsLayers() {
+  harmonographLayer = createGraphics(width, height);
+  harmonographLayer.colorMode(HSB, 360, 100, 100, 100);
+  harmonographLayer.background(0);
+
+  harmonographLayerRight = createGraphics(width, height);
+  harmonographLayerRight.colorMode(HSB, 360, 100, 100, 100);
+  harmonographLayerRight.background(0);
+}
+
 // ============================================================================
 // INITIALIZE PLANETS
 // ============================================================================
 function initializePlanets() {
-  // Left side planets (or full screen when not split)
+  // Planet A: Outer orbit, slower (anchor planet)
+  // Planet B: Dynamic orbit based on pitch
+  // Planet C & D: Additional planets for complex patterns
+
   planetsLeft = [
-    new Planet(0.85, 7, 0, 'A'),
-    new Planet(0.65, 11, PI/4, 'B'),
-    new Planet(0.45, 13, PI/2, 'C'),
-    new Planet(0.25, 17, 3*PI/4, 'D'),
+    new Planet(0.75, 7, 0, 'A'),           // Outer anchor
+    new Planet(0.5, 11, PI/4, 'B'),        // Pitch-reactive
+    new Planet(0.35, 13, PI/2, 'C'),       // Inner
+    new Planet(0.2, 17, 3*PI/4, 'D'),      // Core
   ];
 
-  // Right side planets (for split screen - slightly different phase)
   planetsRight = [
-    new Planet(0.85, 7, PI/6, 'A'),
-    new Planet(0.65, 11, PI/3, 'B'),
-    new Planet(0.45, 13, 2*PI/3, 'C'),
-    new Planet(0.25, 17, 5*PI/6, 'D'),
+    new Planet(0.75, 7, PI/6, 'A'),
+    new Planet(0.5, 11, PI/3, 'B'),
+    new Planet(0.35, 13, 2*PI/3, 'C'),
+    new Planet(0.2, 17, 5*PI/6, 'D'),
   ];
 }
 
@@ -130,6 +140,11 @@ function setupUIListeners() {
 
   // Panel toggle
   document.getElementById('panelToggle').addEventListener('click', togglePanel);
+
+  // Trail persistence toggle
+  document.getElementById('persistentTrailsToggle').addEventListener('change', (e) => {
+    Settings.persistentTrails = e.target.checked;
+  });
 
   // Drawing mode buttons
   document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -186,7 +201,41 @@ function setupUIListeners() {
     document.getElementById('cometValue').textContent = Settings.maxComets;
   });
 
-  // Left side planet pair checkboxes
+  // Beat sensitivity slider
+  const beatSensEl = document.getElementById('beatSensitivitySlider');
+  if (beatSensEl) {
+    beatSensEl.addEventListener('input', (e) => {
+      Settings.beatSensitivity = parseInt(e.target.value) / 100;
+      document.getElementById('beatSensitivityValue').textContent = Settings.beatSensitivity.toFixed(2);
+      // Update analyzer threshold
+      if (audioAnalyzer) {
+        audioAnalyzer.beatCutoff = map(Settings.beatSensitivity, 0, 1, 0.5, 0.15);
+      }
+    });
+  }
+
+  // Pulse strength slider
+  const pulseStrEl = document.getElementById('pulseStrengthSlider');
+  if (pulseStrEl) {
+    pulseStrEl.addEventListener('input', (e) => {
+      Settings.pulseStrength = parseInt(e.target.value);
+      document.getElementById('pulseStrengthValue').textContent = Settings.pulseStrength;
+      if (audioAnalyzer) {
+        audioAnalyzer.pulseStrength = Settings.pulseStrength / 100;
+      }
+    });
+  }
+
+  // Pitch sensitivity slider
+  const pitchSensEl = document.getElementById('pitchSensitivitySlider');
+  if (pitchSensEl) {
+    pitchSensEl.addEventListener('input', (e) => {
+      Settings.pitchSensitivity = parseInt(e.target.value) / 100;
+      document.getElementById('pitchSensitivityValue').textContent = Settings.pitchSensitivity.toFixed(2);
+    });
+  }
+
+  // Planet pair checkboxes
   Settings.planetPairsLeft.forEach((pair, index) => {
     const el = document.getElementById(pair.id);
     if (el) {
@@ -196,7 +245,6 @@ function setupUIListeners() {
     }
   });
 
-  // Right side planet pair checkboxes
   Settings.planetPairsRight.forEach((pair, index) => {
     const el = document.getElementById(pair.id);
     if (el) {
@@ -219,6 +267,9 @@ function togglePanel() {
 function startMicrophone() {
   userStartAudio().then(() => {
     audioAnalyzer.initMicrophone();
+    // Apply current settings to analyzer
+    audioAnalyzer.beatCutoff = map(Settings.beatSensitivity, 0, 1, 0.5, 0.15);
+    audioAnalyzer.pulseStrength = Settings.pulseStrength / 100;
 
     audioStarted = true;
     audioMode = 'mic';
@@ -248,6 +299,10 @@ function handleFileUpload(event) {
     audioFile = loadSound(fileURL,
       () => {
         audioAnalyzer.initAudioFile(audioFile);
+        // Apply current settings
+        audioAnalyzer.beatCutoff = map(Settings.beatSensitivity, 0, 1, 0.5, 0.15);
+        audioAnalyzer.pulseStrength = Settings.pulseStrength / 100;
+
         audioFile.loop();
 
         audioStarted = true;
@@ -303,18 +358,22 @@ function resetDrawing() {
   comets = [];
   frameCounter = 0;
   Settings.lastBeatTime = millis();
+  currentPulseScale = 1.0;
 }
 
 // ============================================================================
 // MAIN DRAW LOOP
 // ============================================================================
 function draw() {
-  // Clear main canvas
-  background(0, 0, 0, 15);
+  // Clear main canvas completely
+  background(0);
 
   // Analyze audio
+  let analysis = { volume: 0, isBeat: false, pulseScale: 1.0 };
+
   if (audioStarted) {
     audioAnalyzer.analyze(audioMode);
+    analysis = audioAnalyzer.getAnalysis();
 
     // Update progress bar
     if (audioMode === 'file' && audioFile && audioFile.isPlaying()) {
@@ -323,9 +382,29 @@ function draw() {
     }
   }
 
-  const analysis = audioAnalyzer.getAnalysis();
+  // ========================================
+  // BEAT-TRIGGERED EFFECTS
+  // ========================================
+  if (analysis.isBeat) {
+    // Trigger color shift in renderers
+    renderer.onBeat(analysis.beatIntensity);
+    rendererRight.onBeat(analysis.beatIntensity);
 
-  // Check if we should draw this frame
+    // Extra background fade on beat for "pumping" effect
+    if (Settings.pulseFadeBackground) {
+      applyBeatFade(harmonographLayer, analysis.beatIntensity);
+      if (Settings.splitScreen) {
+        applyBeatFade(harmonographLayerRight, analysis.beatIntensity);
+      }
+    }
+  }
+
+  // Get the current pulse scale for the "breathing" effect
+  currentPulseScale = analysis.pulseScale;
+
+  // ========================================
+  // UPDATE & DRAW HARMONOGRAPH
+  // ========================================
   let shouldDraw = false;
 
   if (isPlaying || audioMode === 'mic') {
@@ -339,72 +418,147 @@ function draw() {
       }
     }
 
-    // Calculate elapsed time
     let elapsedTime = millis() - startTime;
 
+    // Update pitch-reactive radius for Planet B (index 1)
+    updatePitchReactiveRadius(analysis);
+
     if (Settings.splitScreen) {
-      // SPLIT SCREEN MODE
       drawSplitScreen(analysis, elapsedTime, shouldDraw);
     } else {
-      // FULL SCREEN MODE
       drawFullScreen(analysis, elapsedTime, shouldDraw);
     }
   }
 
-  // Draw the harmonograph layers
-  if (Settings.splitScreen) {
-    // Draw left half
-    image(harmonographLayer, 0, 0, width/2, height, 0, 0, width/2, height);
-    // Draw right half
-    image(harmonographLayerRight, width/2, 0, width/2, height, width/2, 0, width/2, height);
+  // ========================================
+  // DRAW THE GRAPHICS LAYER WITH PULSE SCALING
+  // ========================================
+  drawWithPulse(analysis);
 
-    // Draw divider
-    stroke(255, 50);
-    strokeWeight(1);
-    line(width/2, 0, width/2, height);
-  } else {
-    image(harmonographLayer, 0, 0);
-  }
-
-  // Draw comets
+  // ========================================
+  // DRAW COMETS
+  // ========================================
   if (isPlaying || audioMode === 'mic') {
-    updateComets(analysis.trebleEnergy, analysis.isHighIntensity);
+    updateComets(analysis.treble, analysis.isHighIntensity, analysis.isBeat);
   } else {
     drawCometsOnly();
   }
 }
 
 // ============================================================================
+// APPLY BEAT FADE (Extra background fade on beat)
+// ============================================================================
+function applyBeatFade(layer, intensity) {
+  layer.push();
+  layer.blendMode(BLEND);
+  layer.noStroke();
+  // Stronger fade on stronger beats
+  let fadeAmount = map(intensity, 0.5, 1, 5, 15);
+  layer.fill(0, 0, 0, fadeAmount);
+  layer.rect(0, 0, layer.width, layer.height);
+  layer.pop();
+}
+
+// ============================================================================
+// UPDATE PITCH-REACTIVE RADIUS
+// ============================================================================
+function updatePitchReactiveRadius(analysis) {
+  // Get pitch-mapped radius from analyzer
+  // Low pitch = large radius, High pitch = small radius
+  let pitchRadius = audioAnalyzer.getPitchRadius(
+    Settings.pitchRadiusMin,
+    Settings.pitchRadiusMax
+  );
+
+  // Apply sensitivity scaling
+  let baseRadius = 0.5; // Default middle radius
+  pitchRadius = lerp(baseRadius, pitchRadius, Settings.pitchSensitivity);
+
+  // Update Planet B's target radius (index 1)
+  planetsLeft[1].setTargetRadius(pitchRadius);
+  planetsRight[1].setTargetRadius(pitchRadius);
+
+  // Optionally also affect Planet C slightly
+  let secondaryRadius = lerp(0.35, pitchRadius * 0.7, Settings.pitchSensitivity * 0.5);
+  planetsLeft[2].setTargetRadius(secondaryRadius);
+  planetsRight[2].setTargetRadius(secondaryRadius);
+}
+
+// ============================================================================
+// DRAW WITH PULSE SCALING
+// ============================================================================
+function drawWithPulse(analysis) {
+  push();
+
+  if (Settings.splitScreen) {
+    // Left half with pulse
+    push();
+    translate(width / 4, height / 2);
+    scale(currentPulseScale);
+    translate(-width / 4, -height / 2);
+    image(harmonographLayer, 0, 0, width / 2, height, 0, 0, width / 2, height);
+    pop();
+
+    // Right half with pulse
+    push();
+    translate(width * 3 / 4, height / 2);
+    scale(currentPulseScale);
+    translate(-width * 3 / 4, -height / 2);
+    image(harmonographLayerRight, width / 2, 0, width / 2, height, width / 2, 0, width / 2, height);
+    pop();
+
+    // Draw divider
+    stroke(255, 30);
+    strokeWeight(1);
+    line(width / 2, 0, width / 2, height);
+
+  } else {
+    // Full screen with pulse - scale from center
+    translate(width / 2, height / 2);
+    scale(currentPulseScale);
+    translate(-width / 2, -height / 2);
+    image(harmonographLayer, 0, 0);
+  }
+
+  pop();
+}
+
+// ============================================================================
 // FULL SCREEN DRAWING
 // ============================================================================
 function drawFullScreen(analysis, elapsedTime, shouldDraw) {
+  // Apply background fade based on persistence mode
+  let fadeAmount = Settings.persistentTrails ? Settings.trailFadeAmount : Settings.quickFadeAmount;
+
+  harmonographLayer.push();
+  harmonographLayer.noStroke();
+  harmonographLayer.fill(0, 0, 0, fadeAmount);
+  harmonographLayer.rect(0, 0, width, height);
+  harmonographLayer.pop();
+
   // Update all planets
   for (let planet of planetsLeft) {
-    planet.update(analysis.volume, centerX, centerY, elapsedTime, FULL_CYCLE_DURATION);
+    planet.update(centerX, centerY, elapsedTime, FULL_CYCLE_DURATION, analysis.smoothedVolume);
   }
 
   if (shouldDraw) {
-    // Draw for each enabled pair
+    const drawSettings = {
+      lineOpacity: Settings.lineOpacity,
+      baseLineWeight: Settings.baseLineWeight,
+      noiseAmount: Settings.noiseAmount,
+    };
+
     for (let pair of Settings.planetPairsLeft) {
       if (pair.enabled) {
         const posA = planetsLeft[pair.p1].getPosition();
         const posB = planetsLeft[pair.p2].getPosition();
 
-        const drawSettings = {
-          lineOpacity: Settings.lineOpacity,
-          baseLineWeight: Settings.baseLineWeight,
-          noiseAmount: Settings.noiseAmount,
-          spectralCentroid: analysis.spectralCentroid,
-          volume: analysis.volume,
-          avgVolume: analysis.avgVolume
-        };
-
         if (Settings.drawMode === 'lines' || Settings.drawMode === 'both') {
-          renderer.drawLinkLine(posA, posB, pair.hue, analysis.volume, analysis.isTense, drawSettings);
+          renderer.drawLinkLine(posA, posB, pair.hue, analysis, drawSettings);
         }
 
         if (Settings.drawMode === 'midpoints' || Settings.drawMode === 'both') {
-          renderer.drawMidpoint(posA, posB, pair.hue, analysis.volume, analysis.isTense, drawSettings);
+          renderer.drawMidpoint(posA, posB, pair.hue, analysis, drawSettings);
         }
       }
     }
@@ -415,14 +569,25 @@ function drawFullScreen(analysis, elapsedTime, shouldDraw) {
 // SPLIT SCREEN DRAWING
 // ============================================================================
 function drawSplitScreen(analysis, elapsedTime, shouldDraw) {
+  // Apply background fade based on persistence mode
+  let fadeAmount = Settings.persistentTrails ? Settings.trailFadeAmount : Settings.quickFadeAmount;
+
+  [harmonographLayer, harmonographLayerRight].forEach(layer => {
+    layer.push();
+    layer.noStroke();
+    layer.fill(0, 0, 0, fadeAmount);
+    layer.rect(0, 0, layer.width, layer.height);
+    layer.pop();
+  });
+
   // Update left planets
   for (let planet of planetsLeft) {
-    planet.update(analysis.volume, centerXLeft, centerYLeft, elapsedTime, FULL_CYCLE_DURATION);
+    planet.update(centerXLeft, centerYLeft, elapsedTime, FULL_CYCLE_DURATION, analysis.smoothedVolume);
   }
 
   // Update right planets
   for (let planet of planetsRight) {
-    planet.update(analysis.volume, centerXRight, centerYRight, elapsedTime, FULL_CYCLE_DURATION);
+    planet.update(centerXRight, centerYRight, elapsedTime, FULL_CYCLE_DURATION, analysis.smoothedVolume);
   }
 
   if (shouldDraw) {
@@ -430,9 +595,6 @@ function drawSplitScreen(analysis, elapsedTime, shouldDraw) {
       lineOpacity: Settings.lineOpacity,
       baseLineWeight: Settings.baseLineWeight,
       noiseAmount: Settings.noiseAmount,
-      spectralCentroid: analysis.spectralCentroid,
-      volume: analysis.volume,
-      avgVolume: analysis.avgVolume
     };
 
     // Draw left side
@@ -442,11 +604,11 @@ function drawSplitScreen(analysis, elapsedTime, shouldDraw) {
         const posB = planetsLeft[pair.p2].getPosition();
 
         if (Settings.drawMode === 'lines' || Settings.drawMode === 'both') {
-          renderer.drawLinkLine(posA, posB, pair.hue, analysis.volume, analysis.isTense, drawSettings);
+          renderer.drawLinkLine(posA, posB, pair.hue, analysis, drawSettings);
         }
 
         if (Settings.drawMode === 'midpoints' || Settings.drawMode === 'both') {
-          renderer.drawMidpoint(posA, posB, pair.hue, analysis.volume, analysis.isTense, drawSettings);
+          renderer.drawMidpoint(posA, posB, pair.hue, analysis, drawSettings);
         }
       }
     }
@@ -458,11 +620,11 @@ function drawSplitScreen(analysis, elapsedTime, shouldDraw) {
         const posB = planetsRight[pair.p2].getPosition();
 
         if (Settings.drawMode === 'lines' || Settings.drawMode === 'both') {
-          rendererRight.drawLinkLine(posA, posB, pair.hue, analysis.volume, analysis.isTense, drawSettings);
+          rendererRight.drawLinkLine(posA, posB, pair.hue, analysis, drawSettings);
         }
 
         if (Settings.drawMode === 'midpoints' || Settings.drawMode === 'both') {
-          rendererRight.drawMidpoint(posA, posB, pair.hue, analysis.volume, analysis.isTense, drawSettings);
+          rendererRight.drawMidpoint(posA, posB, pair.hue, analysis, drawSettings);
         }
       }
     }
@@ -472,11 +634,19 @@ function drawSplitScreen(analysis, elapsedTime, shouldDraw) {
 // ============================================================================
 // COMET MANAGEMENT
 // ============================================================================
-function updateComets(trebleEnergy, isHighIntensity) {
-  let targetComets = floor(map(trebleEnergy, 0, 0.5, 5, Settings.maxComets));
-  targetComets = constrain(targetComets, 3, Settings.maxComets);
+function updateComets(trebleEnergy, isHighIntensity, isBeat) {
+  let targetComets = floor(map(trebleEnergy, 0, 0.5, 3, Settings.maxComets));
+  targetComets = constrain(targetComets, 2, Settings.maxComets);
 
-  // Spawn new comets if needed
+  // Spawn burst of comets on beat
+  if (isBeat && comets.length < Settings.maxComets) {
+    let burstCount = floor(random(2, 5));
+    for (let i = 0; i < burstCount && comets.length < Settings.maxComets; i++) {
+      comets.push(new Comet());
+    }
+  }
+
+  // Normal spawning
   while (comets.length < targetComets) {
     comets.push(new Comet());
   }
@@ -519,21 +689,16 @@ function windowResized() {
   let oldLayer = harmonographLayer;
   let oldLayerRight = harmonographLayerRight;
 
-  harmonographLayer = createGraphics(width, height);
-  harmonographLayer.colorMode(HSB, 360, 100, 100, 100);
-  harmonographLayer.background(0);
-  harmonographLayer.image(oldLayer, 0, 0);
+  createGraphicsLayers();
 
-  harmonographLayerRight = createGraphics(width, height);
-  harmonographLayerRight.colorMode(HSB, 360, 100, 100, 100);
-  harmonographLayerRight.background(0);
+  // Copy old content
+  harmonographLayer.image(oldLayer, 0, 0);
   harmonographLayerRight.image(oldLayerRight, 0, 0);
 
   // Update renderers
   renderer = new HarmonographRenderer(harmonographLayer);
   rendererRight = new HarmonographRenderer(harmonographLayerRight);
 
-  // Update centers
   updateCenters();
 }
 

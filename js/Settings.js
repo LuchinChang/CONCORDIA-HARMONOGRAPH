@@ -4,12 +4,27 @@
 
 const Settings = {
   // Visual settings
-  lineOpacity: 25,
-  baseLineWeight: 0.5,
+  lineOpacity: 30,
+  baseLineWeight: 0.8,
   drawInterval: 1,
-  noiseAmount: 50,  // 0-100, controls white noise intensity
+  noiseAmount: 60,  // 0-100, controls vertex noise/electricity intensity
 
-  // BPM settings
+  // Trail persistence
+  persistentTrails: true,  // true = accumulate lines forever, false = fade quickly
+  trailFadeAmount: 0,      // Fade amount when persistent (0 = no fade, permanent)
+  quickFadeAmount: 25,     // Fade amount when not persistent (fast fade)
+
+  // Pitch-to-Radius mapping
+  pitchRadiusMin: 0.25,   // Minimum orbit radius (high pitch)
+  pitchRadiusMax: 0.85,   // Maximum orbit radius (low pitch)
+  pitchSensitivity: 1.0,  // How much pitch affects radius
+
+  // Beat/Pulse settings
+  beatSensitivity: 0.5,   // 0-1, how sensitive beat detection is
+  pulseStrength: 8,       // Percentage to scale on beat (e.g., 8 = 8%)
+  pulseFadeBackground: true, // Extra background fade on beat
+
+  // BPM settings (for manual override)
   bpm: 120,
   useBpmSync: false,
   lastBeatTime: 0,
@@ -19,7 +34,7 @@ const Settings = {
   splitScreen: false,
 
   // Comet settings
-  maxComets: 30,  // Reduced for elegance
+  maxComets: 25,
 
   // Planet pairs for left side (or full screen)
   planetPairsLeft: [
@@ -49,7 +64,7 @@ const Settings = {
   // Check if we should draw based on BPM sync
   shouldDrawOnBeat(currentTime) {
     if (!this.useBpmSync) {
-      return true; // Always draw if not using BPM sync
+      return true;
     }
 
     const msPerBeat = this.getMsPerBeat();

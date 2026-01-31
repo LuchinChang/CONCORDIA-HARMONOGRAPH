@@ -223,6 +223,11 @@ canvas {
   cursor: pointer;
 }
 
+.highlight-toggle {
+  background: rgba(100, 200, 255, 0.1);
+  border: 1px solid rgba(100, 200, 255, 0.3);
+}
+
 /* Slider Container */
 .slider-container {
   margin: 12px 0;

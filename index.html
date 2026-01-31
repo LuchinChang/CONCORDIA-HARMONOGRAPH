@@ -35,7 +35,37 @@
   <button id="panelToggle">⚙ Settings</button>
 
   <div id="planetPanel">
-    <h3>Drawing Settings</h3>
+    <h3>🎵 Audio Reactivity</h3>
+
+    <!-- Beat Detection -->
+    <div class="slider-container">
+      <label>Beat Sensitivity: <span id="beatSensitivityValue">0.50</span></label>
+      <input type="range" id="beatSensitivitySlider" min="0" max="100" value="50">
+      <div class="slider-hint">How easily beats are detected</div>
+    </div>
+
+    <div class="slider-container">
+      <label>Pulse Strength: <span id="pulseStrengthValue">8</span>%</label>
+      <input type="range" id="pulseStrengthSlider" min="0" max="20" value="8">
+      <div class="slider-hint">Screen "thump" on kick drums</div>
+    </div>
+
+    <div class="slider-container">
+      <label>Pitch → Radius: <span id="pitchSensitivityValue">1.00</span></label>
+      <input type="range" id="pitchSensitivitySlider" min="0" max="100" value="100">
+      <div class="slider-hint">Low pitch = expand, High pitch = contract</div>
+    </div>
+
+    <h3>🎨 Drawing Settings</h3>
+
+    <!-- Trail Persistence Toggle -->
+    <div class="toggle-container highlight-toggle">
+      <label>
+        <input type="checkbox" id="persistentTrailsToggle" checked>
+        Persistent Trails (accumulate)
+      </label>
+      <div class="slider-hint">Off = lines fade quickly (live mode)</div>
+    </div>
 
     <!-- Drawing Mode -->
     <div class="section-label">Drawing Mode</div>
@@ -54,11 +84,11 @@
     </div>
 
     <!-- BPM Sync -->
-    <div class="section-label" style="margin-top: 15px;">BPM Sync</div>
+    <div class="section-label" style="margin-top: 15px;">BPM Override</div>
     <div class="toggle-container">
       <label>
         <input type="checkbox" id="bpmSyncToggle">
-        Sync to BPM
+        Manual BPM Sync
       </label>
     </div>
     <div class="slider-container">
@@ -66,42 +96,42 @@
       <input type="range" id="bpmSlider" min="60" max="200" value="120">
     </div>
 
-    <h3 style="margin-top: 20px;">Visual Settings</h3>
+    <h3>✏️ Line Settings</h3>
 
     <div class="slider-container">
-      <label>Line Opacity: <span id="opacityValue">25</span>%</label>
-      <input type="range" id="opacitySlider" min="5" max="100" value="25">
+      <label>Line Opacity: <span id="opacityValue">30</span>%</label>
+      <input type="range" id="opacitySlider" min="5" max="100" value="30">
     </div>
 
     <div class="slider-container">
-      <label>Line Weight: <span id="weightValue">0.5</span></label>
-      <input type="range" id="weightSlider" min="1" max="30" value="5">
+      <label>Line Weight: <span id="weightValue">0.8</span></label>
+      <input type="range" id="weightSlider" min="1" max="30" value="8">
     </div>
 
     <div class="slider-container">
       <label>Draw Interval: <span id="intervalValue">1</span></label>
       <input type="range" id="intervalSlider" min="1" max="30" value="1">
-      <div class="slider-hint">Higher = more spacing</div>
+      <div class="slider-hint">Frames between draws</div>
     </div>
 
     <div class="slider-container">
-      <label>Noise/Jitter: <span id="noiseValue">50</span>%</label>
-      <input type="range" id="noiseSlider" min="0" max="100" value="50">
-      <div class="slider-hint">White noise intensity during tension</div>
+      <label>Electricity: <span id="noiseValue">60</span>%</label>
+      <input type="range" id="noiseSlider" min="0" max="100" value="60">
+      <div class="slider-hint">Jagged lines when loud</div>
     </div>
 
     <div class="slider-container">
-      <label>Comets: <span id="cometValue">30</span></label>
-      <input type="range" id="cometSlider" min="0" max="100" value="30">
+      <label>Comets: <span id="cometValue">25</span></label>
+      <input type="range" id="cometSlider" min="0" max="100" value="25">
     </div>
 
     <!-- Planet Pairs Section -->
-    <h3 id="pairsHeaderLeft">Planet Pairs</h3>
+    <h3 id="pairsHeaderLeft">🪐 Planet Pairs</h3>
     <div id="pairsContainerLeft">
       <div class="pair-option">
         <input type="checkbox" id="pairAB" checked>
         <span class="color-dot" style="background: hsl(200, 80%, 60%);"></span>
-        <label for="pairAB">A ↔ B (7:11)</label>
+        <label for="pairAB">A ↔ B (7:11) <small>pitch-reactive</small></label>
       </div>
       <div class="pair-option">
         <input type="checkbox" id="pairAC">
