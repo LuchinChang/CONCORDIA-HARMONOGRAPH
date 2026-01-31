@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Celestial Harmonograph</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
+  <script src="js/Settings.js"></script>
+  <script src="js/Planet.js"></script>
+  <script src="js/Comet.js"></script>
+  <script src="js/AudioAnalyzer.js"></script>
+  <script src="js/HarmonographRenderer.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="controls">
+    <div id="title">THE CELESTIAL HARMONOGRAPH</div>
+    <div id="subtitle">An Audio-Reactive Generative Art Experience</div>
+
+    <button class="control-btn" id="micBtn">🎤 Use Microphone</button>
+
+    <div id="orDivider">— or —</div>
+
+    <button class="control-btn" id="uploadBtn">📁 Upload Audio File</button>
+    <input type="file" id="fileInput" accept="audio/*">
+
+    <div style="margin-top: 30px; font-size: 12px; opacity: 0.5;">
+      Supports MP3, WAV, OGG, and other audio formats
+    </div>
+  </div>
+
+  <div id="songInfo"></div>
+
+  <button id="panelToggle">⚙ Settings</button>
+
+  <div id="planetPanel">
+    <h3>Drawing Settings</h3>
+
+    <!-- Drawing Mode -->
+    <div class="section-label">Drawing Mode</div>
+    <div class="mode-buttons">
+      <button class="mode-btn active" data-mode="lines">Lines</button>
+      <button class="mode-btn" data-mode="midpoints">Midpoints</button>
+      <button class="mode-btn" data-mode="both">Both</button>
+    </div>
+
+    <!-- Split Screen Toggle -->
+    <div class="toggle-container">
+      <label>
+        <input type="checkbox" id="splitScreenToggle">
+        Split Screen Mode
+      </label>
+    </div>
+
+    <!-- BPM Sync -->
+    <div class="section-label" style="margin-top: 15px;">BPM Sync</div>
+    <div class="toggle-container">
+      <label>
+        <input type="checkbox" id="bpmSyncToggle">
+        Sync to BPM
+      </label>
+    </div>
+    <div class="slider-container">
+      <label>BPM: <span id="bpmValue">120</span></label>
+      <input type="range" id="bpmSlider" min="60" max="200" value="120">
+    </div>
+
+    <h3 style="margin-top: 20px;">Visual Settings</h3>
+
+    <div class="slider-container">
+      <label>Line Opacity: <span id="opacityValue">25</span>%</label>
+      <input type="range" id="opacitySlider" min="5" max="100" value="25">
+    </div>
+
+    <div class="slider-container">
+      <label>Line Weight: <span id="weightValue">0.5</span></label>
+      <input type="range" id="weightSlider" min="1" max="30" value="5">
+    </div>
+
+    <div class="slider-container">
+      <label>Draw Interval: <span id="intervalValue">1</span></label>
+      <input type="range" id="intervalSlider" min="1" max="30" value="1">
+      <div class="slider-hint">Higher = more spacing</div>
+    </div>
+
+    <div class="slider-container">
+      <label>Noise/Jitter: <span id="noiseValue">50</span>%</label>
+      <input type="range" id="noiseSlider" min="0" max="100" value="50">
+      <div class="slider-hint">White noise intensity during tension</div>
+    </div>
+
+    <div class="slider-container">
+      <label>Comets: <span id="cometValue">30</span></label>
+      <input type="range" id="cometSlider" min="0" max="100" value="30">
+    </div>
+
+    <!-- Planet Pairs Section -->
+    <h3 id="pairsHeaderLeft">Planet Pairs</h3>
+    <div id="pairsContainerLeft">
+      <div class="pair-option">
+        <input type="checkbox" id="pairAB" checked>
+        <span class="color-dot" style="background: hsl(200, 80%, 60%);"></span>
+        <label for="pairAB">A ↔ B (7:11)</label>
+      </div>
+      <div class="pair-option">
+        <input type="checkbox" id="pairAC">
+        <span class="color-dot" style="background: hsl(320, 80%, 60%);"></span>
+        <label for="pairAC">A ↔ C (7:13)</label>
+      </div>
+      <div class="pair-option">
+        <input type="checkbox" id="pairBC">
+        <span class="color-dot" style="background: hsl(60, 80%, 60%);"></span>
+        <label for="pairBC">B ↔ C (11:13)</label>
+      </div>
+      <div class="pair-option">
+        <input type="checkbox" id="pairAD">
+        <span class="color-dot" style="background: hsl(140, 80%, 60%);"></span>
+        <label for="pairAD">A ↔ D (7:17)</label>
+      </div>
+      <div class="pair-option">
+        <input type="checkbox" id="pairBD">
+        <span class="color-dot" style="background: hsl(280, 80%, 60%);"></span>
+        <label for="pairBD">B ↔ D (11:17)</label>
+      </div>
+      <div class="pair-option">
+        <input type="checkbox" id="pairCD">
+        <span class="color-dot" style="background: hsl(20, 80%, 60%);"></span>
+        <label for="pairCD">C ↔ D (13:17)</label>
+      </div>
+    </div>
+
+    <!-- Right Side Pairs (shown in split screen mode) -->
+    <div id="rightPairsSection" style="display: none;">
+      <h3>Right Side Pairs</h3>
+      <div id="pairsContainerRight">
+        <div class="pair-option">
+          <input type="checkbox" id="pairAB_R">
+          <span class="color-dot" style="background: hsl(200, 80%, 60%);"></span>
+          <label for="pairAB_R">A ↔ B (7:11)</label>
+        </div>
+        <div class="pair-option">
+          <input type="checkbox" id="pairAC_R" checked>
+          <span class="color-dot" style="background: hsl(320, 80%, 60%);"></span>
+          <label for="pairAC_R">A ↔ C (7:13)</label>
+        </div>
+        <div class="pair-option">
+          <input type="checkbox" id="pairBC_R">
+          <span class="color-dot" style="background: hsl(60, 80%, 60%);"></span>
+          <label for="pairBC_R">B ↔ C (11:13)</label>
+        </div>
+        <div class="pair-option">
+          <input type="checkbox" id="pairAD_R">
+          <span class="color-dot" style="background: hsl(140, 80%, 60%);"></span>
+          <label for="pairAD_R">A ↔ D (7:17)</label>
+        </div>
+        <div class="pair-option">
+          <input type="checkbox" id="pairBD_R">
+          <span class="color-dot" style="background: hsl(280, 80%, 60%);"></span>
+          <label for="pairBD_R">B ↔ D (11:17)</label>
+        </div>
+        <div class="pair-option">
+          <input type="checkbox" id="pairCD_R">
+          <span class="color-dot" style="background: hsl(20, 80%, 60%);"></span>
+          <label for="pairCD_R">C ↔ D (13:17)</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="playbackControls">
+    <button class="playback-btn" id="playPauseBtn">⏸ Pause</button>
+    <button class="playback-btn" id="restartBtn">↺ Restart</button>
+    <button class="playback-btn" id="resetDrawingBtn">🗑 Clear</button>
+  </div>
+
+  <div id="progressBar"></div>
+
+  <div id="info">R: Reset | S: Save | Space: Play/Pause | P: Settings</div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

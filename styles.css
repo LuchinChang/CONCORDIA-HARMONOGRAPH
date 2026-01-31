@@ -1,0 +1,324 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+canvas {
+  display: block;
+}
+
+#controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: 'Georgia', serif;
+  color: white;
+}
+
+.control-btn {
+  padding: 20px 40px;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  transition: all 0.3s ease;
+  margin: 10px;
+  display: inline-block;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#fileInput {
+  display: none;
+}
+
+#title {
+  font-size: 32px;
+  margin-bottom: 30px;
+  letter-spacing: 3px;
+}
+
+#subtitle {
+  font-size: 14px;
+  opacity: 0.6;
+  margin-bottom: 40px;
+}
+
+#orDivider {
+  margin: 20px 0;
+  opacity: 0.5;
+}
+
+#info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+  font-size: 12px;
+}
+
+#playbackControls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: none;
+}
+
+.playback-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: monospace;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+}
+
+.playback-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+#songInfo {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  display: none;
+  text-align: center;
+}
+
+/* Settings Panel */
+#planetPanel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 15px;
+  font-family: monospace;
+  font-size: 12px;
+  color: white;
+  display: none;
+  max-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#planetPanel h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+#panelToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 12px;
+  display: none;
+  z-index: 100;
+}
+
+#panelToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mode Buttons */
+.section-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 8px 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: monospace;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.mode-btn.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* Toggle Container */
+.toggle-container {
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+}
+
+.toggle-container label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle-container input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Slider Container */
+.slider-container {
+  margin: 12px 0;
+}
+
+.slider-container label {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.slider-container input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-appearance: none;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+.slider-hint {
+  font-size: 10px;
+  opacity: 0.5;
+  margin-top: 3px;
+}
+
+/* Planet Pair Options */
+.pair-option {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+
+.pair-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pair-option input {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.pair-option label {
+  cursor: pointer;
+  flex: 1;
+  font-size: 11px;
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  display: inline-block;
+}
+
+/* Split screen divider */
+#splitDivider {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  display: none;
+  pointer-events: none;
+}
+
+/* Scrollbar for panel */
+#planetPanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+#planetPanel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+#planetPanel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+#planetPanel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
