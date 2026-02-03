@@ -2,6 +2,32 @@
 
 All notable changes to The Celestial Harmonograph project will be documented in this file.
 
+## [2.1.0] - 2025-02-02
+
+### Added
+
+#### Interactive Help Guide
+- **Help Modal**: In-app quick start guide accessible via `?` button or keyboard shortcut
+- **`?` / `/` keyboard shortcut**: Toggle help modal from anywhere
+- Help content includes:
+  - Getting started instructions
+  - Audio-to-visual mapping explanation
+  - Complete keyboard shortcuts reference
+  - Physics modes explanation (Legacy vs Reactive)
+  - "Chaos Mode" featured settings combination
+  - Tips organized by music genre
+
+#### User Guide Documentation
+- **USER_GUIDE.md**: Standalone markdown guide for sharing/PDF export
+- Concise, beginner-friendly format
+- Covers all essential features and recommended settings
+
+### Changed
+- Updated info bar to include `?: Help` shortcut
+- Reorganized button layout (Settings and Help buttons)
+
+---
+
 ## [2.0.0] - 2025-02-02
 
 ### Major Refactor: Multi-Band Beat Detection & Per-Window Settings

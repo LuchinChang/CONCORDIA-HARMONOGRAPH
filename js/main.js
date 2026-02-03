@@ -290,6 +290,13 @@ function setupUIListeners() {
   // Panel toggle
   document.getElementById('panelToggle').addEventListener('click', togglePanel);
 
+  // Help modal toggle
+  document.getElementById('helpToggle').addEventListener('click', toggleHelpModal);
+  document.getElementById('helpClose').addEventListener('click', toggleHelpModal);
+  document.getElementById('helpModal').addEventListener('click', (e) => {
+    if (e.target.id === 'helpModal') toggleHelpModal();
+  });
+
   // Window selector for per-window settings
   const windowSelector = document.getElementById('windowSelector');
   if (windowSelector) {
@@ -591,6 +598,12 @@ function togglePanel() {
   panelVisible = !panelVisible;
   document.getElementById('planetPanel').style.display = panelVisible ? 'block' : 'none';
   document.getElementById('panelToggle').textContent = panelVisible ? 'Close' : 'Settings';
+}
+
+let helpModalVisible = false;
+function toggleHelpModal() {
+  helpModalVisible = !helpModalVisible;
+  document.getElementById('helpModal').classList.toggle('active', helpModalVisible);
 }
 
 // ============================================================================
@@ -1124,6 +1137,10 @@ function keyPressed() {
     for (let sys of systems) {
       sys.setTimeScale(Settings.timeScale);
     }
+  }
+
+  if (key === '?' || key === '/') {
+    toggleHelpModal();
   }
 }
 

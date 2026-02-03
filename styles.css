@@ -398,3 +398,190 @@ canvas {
   background: #222;
   color: white;
 }
+
+/* Help Button */
+#helpToggle {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.2s;
+}
+
+#helpToggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* Help Modal Overlay */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 2000;
+  overflow-y: auto;
+  backdrop-filter: blur(5px);
+}
+
+.modal-overlay.active {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+}
+
+/* Help Modal Content */
+.modal-content {
+  background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  max-width: 700px;
+  width: 100%;
+  padding: 30px 40px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 28px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: white;
+}
+
+.modal-content h1 {
+  text-align: center;
+  color: white;
+  font-size: 28px;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.modal-content h2 {
+  color: rgba(100, 200, 255, 0.9);
+  font-size: 16px;
+  margin: 25px 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 1px;
+}
+
+.modal-content h3 {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  margin: 15px 0 8px 0;
+}
+
+.modal-content p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+.modal-content ul, .modal-content ol {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 10px 0;
+  padding-left: 25px;
+}
+
+.modal-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.modal-content td {
+  padding: 8px 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-content td:first-child {
+  width: 40%;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-content kbd {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 11px;
+  color: white;
+  margin: 0 2px;
+}
+
+.modal-content section {
+  margin-bottom: 20px;
+}
+
+.highlight-section {
+  background: rgba(200, 100, 255, 0.1);
+  border: 1px solid rgba(200, 100, 255, 0.3);
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin: 20px 0;
+}
+
+.highlight-section h2 {
+  color: rgba(200, 150, 255, 1);
+  border-bottom: none;
+  margin-top: 0;
+}
+
+.modal-footer {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+/* Responsive adjustments for help modal */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  .modal-content h1 {
+    font-size: 22px;
+  }
+
+  .modal-content td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}

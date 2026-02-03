@@ -62,9 +62,12 @@ npx http-server -p 8000
 
 Then:
 1. Choose **Microphone** or **Upload Audio File**
-2. Press `3` for Triple mode (Bass | Mid | Treble split)
-3. Press `P` to open settings
-4. Press `D` to view beat detection debug
+2. Press `?` for the interactive help guide
+3. Press `3` for Triple mode (Bass | Mid | Treble split)
+4. Press `P` to open settings
+5. Press `D` to view beat detection debug
+
+> **New to Harmonograph?** Press `?` or click the help button for a quick start guide with tips and recommended settings.
 
 ---
 
@@ -415,6 +418,7 @@ Use the dropdown in the Settings panel to select which window to configure.
 | `G` | Toggle physics mode |
 | `B` | Toggle celestial bodies |
 | `+`/`-` | Increase/decrease time scale |
+| `?` | Toggle help guide |
 
 ---
 
