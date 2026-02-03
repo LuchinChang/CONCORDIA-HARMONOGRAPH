@@ -327,3 +327,74 @@ canvas {
 #planetPanel::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* Layout Mode Buttons */
+.layout-btn {
+  flex: 1;
+  padding: 8px 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: monospace;
+  transition: all 0.2s;
+}
+
+.layout-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.layout-btn.active {
+  background: rgba(100, 200, 255, 0.3);
+  border-color: rgba(100, 200, 255, 0.6);
+  color: white;
+}
+
+/* Physics Mode Buttons */
+.physics-btn {
+  flex: 1;
+  padding: 8px 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: monospace;
+  transition: all 0.2s;
+}
+
+.physics-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.physics-btn.active {
+  background: rgba(200, 100, 255, 0.3);
+  border-color: rgba(200, 100, 255, 0.6);
+  color: white;
+}
+
+/* Window Selector Dropdown */
+.window-selector {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  color: white;
+  font-family: monospace;
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.window-selector:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.window-selector option {
+  background: #222;
+  color: white;
+}

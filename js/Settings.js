@@ -1,9 +1,9 @@
 // ============================================================================
-// SETTINGS - Global settings management
+// SETTINGS - Global settings management with per-window support
 // ============================================================================
 
 const Settings = {
-  // Visual settings
+  // Visual settings (global defaults)
   lineOpacity: 30,
   baseLineWeight: 0.8,
   drawInterval: 1,
@@ -33,8 +33,122 @@ const Settings = {
   drawMode: 'lines',  // 'lines', 'midpoints', 'both'
   splitScreen: false,
 
+  // Layout mode: 'single', 'dual', 'triple'
+  layoutMode: 'single',
+
   // Comet settings
   maxComets: 25,
+
+  // Physics settings
+  physicsMode: 'legacy',
+
+  // Gravity system parameters
+  gravityStrength: 1000,
+  timeScale: 1.0,
+
+  // Celestial body visibility
+  showBodies: false,
+
+  // ========================================
+  // PER-WINDOW SETTINGS (for triple mode)
+  // ========================================
+  windowSettings: {
+    bass: {
+      drawMode: 'lines',
+      lineOpacity: 30,
+      baseLineWeight: 0.8,
+      noiseAmount: 60,
+      persistentTrails: true,
+      trailFadeAmount: 0,
+      pulseStrength: 12,  // Bass gets stronger pulse
+      activePairs: ['AB'],
+      physicsMode: 'legacy',
+      showBodies: false,
+    },
+    mid: {
+      drawMode: 'lines',
+      lineOpacity: 30,
+      baseLineWeight: 0.8,
+      noiseAmount: 40,
+      persistentTrails: true,
+      trailFadeAmount: 0,
+      pulseStrength: 8,
+      activePairs: ['AB'],
+      physicsMode: 'legacy',
+      showBodies: false,
+    },
+    treble: {
+      drawMode: 'lines',
+      lineOpacity: 30,
+      baseLineWeight: 0.6,  // Thinner for treble
+      noiseAmount: 80,  // More jittery for treble
+      persistentTrails: true,
+      trailFadeAmount: 0,
+      pulseStrength: 5,
+      activePairs: ['AB'],
+      physicsMode: 'legacy',
+      showBodies: false,
+    },
+    // For single/dual modes
+    left: {
+      drawMode: 'lines',
+      lineOpacity: 30,
+      baseLineWeight: 0.8,
+      noiseAmount: 60,
+      persistentTrails: true,
+      trailFadeAmount: 0,
+      pulseStrength: 8,
+      activePairs: ['AB'],
+      physicsMode: 'legacy',
+      showBodies: false,
+    },
+    right: {
+      drawMode: 'lines',
+      lineOpacity: 30,
+      baseLineWeight: 0.8,
+      noiseAmount: 60,
+      persistentTrails: true,
+      trailFadeAmount: 0,
+      pulseStrength: 8,
+      activePairs: ['AC'],
+      physicsMode: 'legacy',
+      showBodies: false,
+    },
+    main: {
+      drawMode: 'lines',
+      lineOpacity: 30,
+      baseLineWeight: 0.8,
+      noiseAmount: 60,
+      persistentTrails: true,
+      trailFadeAmount: 0,
+      pulseStrength: 8,
+      activePairs: ['AB'],
+      physicsMode: 'legacy',
+      showBodies: false,
+    },
+  },
+
+  // Currently selected window for editing
+  selectedWindow: 'all',  // 'all', 'bass', 'mid', 'treble', 'left', 'right', 'main'
+
+  // Get settings for a specific window
+  getWindowSettings(windowId) {
+    return this.windowSettings[windowId] || this.windowSettings.main;
+  },
+
+  // Update a specific window's setting
+  updateWindowSetting(windowId, key, value) {
+    if (this.windowSettings[windowId]) {
+      this.windowSettings[windowId][key] = value;
+    }
+  },
+
+  // Update all windows with a setting (when 'all' is selected)
+  updateAllWindowSettings(key, value) {
+    for (let windowId in this.windowSettings) {
+      this.windowSettings[windowId][key] = value;
+    }
+  },
 
   // Planet pairs for left side (or full screen)
   planetPairsLeft: [

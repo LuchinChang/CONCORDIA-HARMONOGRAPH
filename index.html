@@ -4,25 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Celestial Harmonograph</title>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
-  <script src="js/Settings.js"></script>
-  <script src="js/Planet.js"></script>
-  <script src="js/Comet.js"></script>
-  <script src="js/AudioAnalyzer.js"></script>
-  <script src="js/HarmonographRenderer.js"></script>
-  <link rel="stylesheet" href="styles.css">
+
+  <script src="js/Settings.js?v=2.1"></script>
+  <script src="js/Planet.js?v=2.1"></script>
+  <script src="js/Comet.js?v=2.1"></script>
+  <script src="js/AudioAnalyzer.js?v=2.1"></script>
+  <script src="js/HarmonographRenderer.js?v=2.1"></script>
+  <script src="js/GravitySystem.js?v=2.1"></script>
+  <script src="js/HarmonographSystem.js?v=2.1"></script>
+  <script src="js/BeatDebugView.js?v=2.1"></script>
+
+  <link rel="stylesheet" href="styles.css?v=2.1">
 </head>
 <body>
   <div id="controls">
     <div id="title">THE CELESTIAL HARMONOGRAPH</div>
     <div id="subtitle">An Audio-Reactive Generative Art Experience</div>
 
-    <button class="control-btn" id="micBtn">🎤 Use Microphone</button>
+    <button class="control-btn" id="micBtn">Use Microphone</button>
 
-    <div id="orDivider">— or —</div>
+    <div id="orDivider">- or -</div>
 
-    <button class="control-btn" id="uploadBtn">📁 Upload Audio File</button>
+    <button class="control-btn" id="uploadBtn">Upload Audio File</button>
     <input type="file" id="fileInput" accept="audio/*">
 
     <div style="margin-top: 30px; font-size: 12px; opacity: 0.5;">
@@ -32,12 +38,19 @@
 
   <div id="songInfo"></div>
 
-  <button id="panelToggle">⚙ Settings</button>
+  <button id="panelToggle">Settings</button>
 
   <div id="planetPanel">
-    <h3>🎵 Audio Reactivity</h3>
+    <!-- Window Selector for per-window settings -->
+    <div class="section-label">Apply Settings To:</div>
+    <select id="windowSelector" class="window-selector">
+      <option value="all">All Windows</option>
+      <option value="main">Main Window</option>
+    </select>
+    <div class="slider-hint">Select which window(s) to configure</div>
 
-    <!-- Beat Detection -->
+    <h3>Audio Reactivity</h3>
+
     <div class="slider-container">
       <label>Beat Sensitivity: <span id="beatSensitivityValue">0.50</span></label>
       <input type="range" id="beatSensitivitySlider" min="0" max="100" value="50">
@@ -51,14 +64,13 @@
     </div>
 
     <div class="slider-container">
-      <label>Pitch → Radius: <span id="pitchSensitivityValue">1.00</span></label>
+      <label>Pitch to Radius: <span id="pitchSensitivityValue">1.00</span></label>
       <input type="range" id="pitchSensitivitySlider" min="0" max="100" value="100">
       <div class="slider-hint">Low pitch = expand, High pitch = contract</div>
     </div>
 
-    <h3>🎨 Drawing Settings</h3>
+    <h3>Drawing Settings</h3>
 
-    <!-- Trail Persistence Toggle -->
     <div class="toggle-container highlight-toggle">
       <label>
         <input type="checkbox" id="persistentTrailsToggle" checked>
@@ -67,7 +79,6 @@
       <div class="slider-hint">Off = lines fade quickly (live mode)</div>
     </div>
 
-    <!-- Drawing Mode -->
     <div class="section-label">Drawing Mode</div>
     <div class="mode-buttons">
       <button class="mode-btn active" data-mode="lines">Lines</button>
@@ -75,15 +86,39 @@
       <button class="mode-btn" data-mode="both">Both</button>
     </div>
 
-    <!-- Split Screen Toggle -->
-    <div class="toggle-container">
-      <label>
-        <input type="checkbox" id="splitScreenToggle">
-        Split Screen Mode
-      </label>
+    <div class="section-label" style="margin-top: 10px;">Layout Mode</div>
+    <div class="mode-buttons">
+      <button class="layout-btn active" data-layout="single">Single</button>
+      <button class="layout-btn" data-layout="dual">Dual</button>
+      <button class="layout-btn" data-layout="triple">Triple</button>
+    </div>
+    <div class="slider-hint">Triple = Bass | Mid | Treble split view</div>
+
+    <h3>Physics Mode</h3>
+    <div class="mode-buttons">
+      <button class="physics-btn active" data-physics="legacy">Legacy</button>
+      <button class="physics-btn" data-physics="reactive">Reactive</button>
+    </div>
+    <div class="slider-hint">Legacy = circular orbits | Reactive = audio affects gravity</div>
+
+    <div class="slider-container" style="margin-top: 10px;">
+      <label>Gravity Strength: <span id="gravityValue">1000</span></label>
+      <input type="range" id="gravitySlider" min="100" max="5000" value="1000">
     </div>
 
-    <!-- BPM Sync -->
+    <div class="slider-container">
+      <label>Time Scale: <span id="timeScaleValue">1.0</span>x</label>
+      <input type="range" id="timeScaleSlider" min="10" max="300" value="100">
+    </div>
+
+    <div class="toggle-container">
+      <label>
+        <input type="checkbox" id="showBodiesToggle">
+        Show Celestial Bodies
+      </label>
+      <div class="slider-hint">Show sun, planets, and orbital trails</div>
+    </div>
+
     <div class="section-label" style="margin-top: 15px;">BPM Override</div>
     <div class="toggle-container">
       <label>
@@ -96,7 +131,7 @@
       <input type="range" id="bpmSlider" min="60" max="200" value="120">
     </div>
 
-    <h3>✏️ Line Settings</h3>
+    <h3>Line Settings</h3>
 
     <div class="slider-container">
       <label>Line Opacity: <span id="opacityValue">30</span>%</label>
@@ -125,89 +160,87 @@
       <input type="range" id="cometSlider" min="0" max="100" value="25">
     </div>
 
-    <!-- Planet Pairs Section -->
-    <h3 id="pairsHeaderLeft">🪐 Planet Pairs</h3>
+    <h3 id="pairsHeaderLeft">Planet Pairs</h3>
     <div id="pairsContainerLeft">
       <div class="pair-option">
         <input type="checkbox" id="pairAB" checked>
         <span class="color-dot" style="background: hsl(200, 80%, 60%);"></span>
-        <label for="pairAB">A ↔ B (7:11) <small>pitch-reactive</small></label>
+        <label for="pairAB">A-B (7:11) <small>pitch-reactive</small></label>
       </div>
       <div class="pair-option">
         <input type="checkbox" id="pairAC">
         <span class="color-dot" style="background: hsl(320, 80%, 60%);"></span>
-        <label for="pairAC">A ↔ C (7:13)</label>
+        <label for="pairAC">A-C (7:13)</label>
       </div>
       <div class="pair-option">
         <input type="checkbox" id="pairBC">
         <span class="color-dot" style="background: hsl(60, 80%, 60%);"></span>
-        <label for="pairBC">B ↔ C (11:13)</label>
+        <label for="pairBC">B-C (11:13)</label>
       </div>
       <div class="pair-option">
         <input type="checkbox" id="pairAD">
         <span class="color-dot" style="background: hsl(140, 80%, 60%);"></span>
-        <label for="pairAD">A ↔ D (7:17)</label>
+        <label for="pairAD">A-D (7:17)</label>
       </div>
       <div class="pair-option">
         <input type="checkbox" id="pairBD">
         <span class="color-dot" style="background: hsl(280, 80%, 60%);"></span>
-        <label for="pairBD">B ↔ D (11:17)</label>
+        <label for="pairBD">B-D (11:17)</label>
       </div>
       <div class="pair-option">
         <input type="checkbox" id="pairCD">
         <span class="color-dot" style="background: hsl(20, 80%, 60%);"></span>
-        <label for="pairCD">C ↔ D (13:17)</label>
+        <label for="pairCD">C-D (13:17)</label>
       </div>
     </div>
 
-    <!-- Right Side Pairs (shown in split screen mode) -->
     <div id="rightPairsSection" style="display: none;">
       <h3>Right Side Pairs</h3>
       <div id="pairsContainerRight">
         <div class="pair-option">
           <input type="checkbox" id="pairAB_R">
           <span class="color-dot" style="background: hsl(200, 80%, 60%);"></span>
-          <label for="pairAB_R">A ↔ B (7:11)</label>
+          <label for="pairAB_R">A-B (7:11)</label>
         </div>
         <div class="pair-option">
           <input type="checkbox" id="pairAC_R" checked>
           <span class="color-dot" style="background: hsl(320, 80%, 60%);"></span>
-          <label for="pairAC_R">A ↔ C (7:13)</label>
+          <label for="pairAC_R">A-C (7:13)</label>
         </div>
         <div class="pair-option">
           <input type="checkbox" id="pairBC_R">
           <span class="color-dot" style="background: hsl(60, 80%, 60%);"></span>
-          <label for="pairBC_R">B ↔ C (11:13)</label>
+          <label for="pairBC_R">B-C (11:13)</label>
         </div>
         <div class="pair-option">
           <input type="checkbox" id="pairAD_R">
           <span class="color-dot" style="background: hsl(140, 80%, 60%);"></span>
-          <label for="pairAD_R">A ↔ D (7:17)</label>
+          <label for="pairAD_R">A-D (7:17)</label>
         </div>
         <div class="pair-option">
           <input type="checkbox" id="pairBD_R">
           <span class="color-dot" style="background: hsl(280, 80%, 60%);"></span>
-          <label for="pairBD_R">B ↔ D (11:17)</label>
+          <label for="pairBD_R">B-D (11:17)</label>
         </div>
         <div class="pair-option">
           <input type="checkbox" id="pairCD_R">
           <span class="color-dot" style="background: hsl(20, 80%, 60%);"></span>
-          <label for="pairCD_R">C ↔ D (13:17)</label>
+          <label for="pairCD_R">C-D (13:17)</label>
         </div>
       </div>
     </div>
   </div>
 
   <div id="playbackControls">
-    <button class="playback-btn" id="playPauseBtn">⏸ Pause</button>
-    <button class="playback-btn" id="restartBtn">↺ Restart</button>
-    <button class="playback-btn" id="resetDrawingBtn">🗑 Clear</button>
+    <button class="playback-btn" id="playPauseBtn">Pause</button>
+    <button class="playback-btn" id="restartBtn">Restart</button>
+    <button class="playback-btn" id="resetDrawingBtn">Clear</button>
   </div>
 
   <div id="progressBar"></div>
 
-  <div id="info">R: Reset | S: Save | Space: Play/Pause | P: Settings</div>
+  <div id="info">R: Reset | S: Save | Space: Play/Pause | P: Settings | D: Debug | G: Physics | B: Bodies | +/-: Speed | 1/2/3: Layout</div>
 
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=2.1"></script>
 </body>
 </html>
